@@ -30,9 +30,38 @@ module.exports.getUsersInfo = async (userId, password) => {
  * @param {string} userId ユーザーID
  */
 module.exports.updateLoginStatus = async (userId, status) => {
-  await supabase.from("users").update({ status }).eq("id", userId).select();
+  const { data, error } = await supabase
+    .from("users")
+    .update({ status })
+    .eq("userId", userId)
+    .select("status");
+
+  if (error) {
+    console.log(error);
+  }
+
+  return data[0].status;
 };
 
+module.exports.getLoginInfo = async (userId) => {
+  const { data, error } = await supabase
+    .from("users")
+    .select("status")
+    .eq("userId", userId);
+
+  if (error) {
+    console.log(error);
+  }
+
+  console.log(data);
+
+  return data[0].status;
+};
+
+/**
+ * 書籍一覧取得
+ * @returns 書籍一覧
+ */
 module.exports.getBooks = async () => {
   let { data: books, error } = await supabase.from("books").select("*");
 

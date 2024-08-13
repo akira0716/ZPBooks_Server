@@ -4,6 +4,7 @@ const {
   updateLoginStatus,
   getBooks,
   getBookmark,
+  getLoginInfo,
 } = require("./supabase");
 const { ErrMsgDefine } = require("./errMsgDefine");
 
@@ -29,6 +30,9 @@ app.put("/login", async (req, res) => {
   // リクエスト情報取得
   const { userId, password } = req.body;
 
+  console.log("[ログイン]");
+  console.log("ユーザーID: " + userId);
+
   // ユーザー管理テーブルのデータを取得
   const userInfo = await getUsersInfo(userId, password);
 
@@ -52,13 +56,14 @@ app.put("/login", async (req, res) => {
     }
 
     // ログイン状態を更新
-    updateLoginStatus(userInfo.userId, true);
+    const loginStatus = await updateLoginStatus(userInfo[0].userId, true);
 
     // 送信データを設定
     sendData.id = userInfo[0].id;
     sendData.userId = userInfo[0].userId;
-    sendData.loginStatus = userInfo[0].status;
+    sendData.loginStatus = loginStatus;
 
+    // 送信
     res.send(sendData);
   }
   // ユーザー管理テーブルにアカウントが存在しない場合
@@ -69,29 +74,52 @@ app.put("/login", async (req, res) => {
     // 送信データにエラーメッセージを設定
     sendData.errMsg = ErrMsgDefine.ERROR_MESSAGE_01;
 
+    // 送信
     res.send(sendData);
   }
 });
 
 // ログアウト時
-app.put("/logout", (req, res) => {
+app.put("/logout", async (req, res) => {
   // リクエスト情報取得
   const { userId } = req.body;
 
+  console.log("[ログアウト]");
+  console.log("ユーザーID: " + userId);
+
   // ログアウト
-  updateLoginStatus(userId, false);
+  await updateLoginStatus(userId, false);
 
   const sendData = {
     loginStatus: false,
     errMsg: "",
   };
 
+  // 送信
   res.send(sendData);
 });
 
 // 書籍一覧取得
 app.get("/book-list/:userId", async (req, res) => {
   const { userId } = req.params;
+
+  // 送信データ定義
+  const sendData = {
+    books: [],
+    errMsg: "",
+  };
+
+  // ログイン中ではない場合
+  const status = await getLoginInfo(userId);
+  if (!status) {
+    // 送信データを設定
+    sendData.errMsg = ErrMsgDefine.ERROR_MESSAGE_03;
+
+    // 送信
+    res.send(sendData);
+    return;
+  }
+
   // bookmarkテーブルからデータ取得
   const bookmarks = await getBookmark(userId);
 
@@ -109,7 +137,11 @@ app.get("/book-list/:userId", async (req, res) => {
     });
   });
 
-  res.send(books);
+  // 送信データを設定
+  sendData.books = books;
+
+  // 送信
+  res.send(sendData);
 });
 
 app.listen(port, () => {
