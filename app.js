@@ -147,7 +147,8 @@ app.get("/book-list/:userId", async (req, res) => {
 
 // お気に入り登録
 app.put("/favorite", async (req, res) => {
-  const { userId, bookId } = req.params;
+  const { userId, bookId } = req.body;
+
   console.log(userId);
   console.log(bookId);
 
