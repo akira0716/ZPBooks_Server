@@ -5,6 +5,7 @@ const {
   getBooks,
   getBookmark,
   getLoginInfo,
+  setBookmark,
 } = require("./supabase");
 const { ErrMsgDefine } = require("./errMsgDefine");
 
@@ -30,8 +31,8 @@ app.put("/login", async (req, res) => {
   // リクエスト情報取得
   const { userId, password } = req.body;
 
-  console.log("[ログイン]");
-  console.log("ユーザーID: " + userId);
+  console.log("[ユーザーID]: " + userId);
+  console.log("[パスワード]:" + password);
 
   // ユーザー管理テーブルのデータを取得
   const userInfo = await getUsersInfo(userId, password);
@@ -141,6 +142,21 @@ app.get("/book-list/:userId", async (req, res) => {
   sendData.books = books;
 
   // 送信
+  res.send(sendData);
+});
+
+// お気に入り登録
+app.put("/favorite", (req, res) => {
+  const { userId, bookId } = req.params;
+
+  // 送信データ定義
+  const sendData = {
+    errMsg: "",
+  };
+
+  // ブックマーク登録
+  setBookmark(userId, bookId);
+
   res.send(sendData);
 });
 

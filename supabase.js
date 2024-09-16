@@ -84,3 +84,10 @@ module.exports.getBookmark = async (userId) => {
 
   return bookmarks;
 };
+
+module.exports.setBookmark = async (userId, bookId) => {
+  const { data: bookmarks, error } = await supabase
+    .from("bookmarks")
+    .insert({ userId, bookId })
+    .select();
+};
