@@ -146,8 +146,10 @@ app.get("/book-list/:userId", async (req, res) => {
 });
 
 // お気に入り登録
-app.put("/favorite", (req, res) => {
+app.put("/favorite", async (req, res) => {
   const { userId, bookId } = req.params;
+  console.log(userId);
+  console.log(bookId);
 
   // 送信データ定義
   const sendData = {
@@ -155,7 +157,7 @@ app.put("/favorite", (req, res) => {
   };
 
   // ブックマーク登録
-  setBookmark(userId, bookId);
+  await setBookmark(userId, bookId);
 
   res.send(sendData);
 });
